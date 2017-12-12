@@ -1,7 +1,6 @@
 package sample;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
@@ -9,27 +8,8 @@ import javafx.scene.text.TextAlignment;
 import java.util.Random;
 
 public class GameHandler {
-    public static final int TILE_SIZE = 100;
-    public static final int WIDTH = 4;
-    public static final int HEIGHT = 4;
-    public static final int PADDING = 10;
-    public static final int WINDOW_WIDTH = TILE_SIZE*WIDTH + PADDING*(WIDTH + 1);
-    public static final int WINDOW_HEIGHT = TILE_SIZE*HEIGHT + PADDING*(HEIGHT + 1);
 
-    private static final Color BACKGROUND = Color.valueOf("#BBADA0");
-    private static final Color EMPTY = Color.valueOf("#CDC1B4");
-    private static final Color TWO = Color.valueOf("#EEE4DA");
-    private static final Color FOUR = Color.valueOf("#EDE0C8");
-    private static final Color EIGHT = Color.valueOf("#F2B179");
-    private static final Color SIXTEEN = Color.valueOf("#F59563");
-    private static final Color THIRTY = Color.valueOf("#F67C5F");
-    private static final Color SIXTY = Color.valueOf("#F65E3B");
-    private static final Color ONEHUNDRED = Color.valueOf("#EDCF72");
-    private static final Color TWOHUNDRED = Color.valueOf("#EDCC61");
-    private static final Color FIVEHUNDRED = Color.valueOf("#EDC850");
-    private static final Color ONETHOUSAND = Color.valueOf("#EDC53F");
-    private static final Color TWOTHOUSAND = Color.valueOf("#FBC52D");
-
+    public static final int SIZE = 4;
 
     private int[][] gameBoard;
     private Random rnd;
@@ -37,80 +17,84 @@ public class GameHandler {
     private boolean gameOver;
     private boolean winner;
 
+    public enum Movement {
+        UP,
+        DOWN,
+        RIGHT,
+        LEFT
+    }
+
     public GameHandler(GraphicsContext gc) {
         this.gc = gc;
         this.gc.setTextAlign(TextAlignment.CENTER);
         this.gc.setFont(Font.font("Arial", FontWeight.BOLD, 40));
         rnd = new Random();
-        gameBoard = new int[WIDTH][HEIGHT];
+        gameBoard = new int[SIZE][SIZE];
         gameOver = false;
         winner = false;
         placePiece();
         placePiece();
     }
 
-    public void drawBoard(){
-        if(gameOver) {
-            gc.setFill(Color.BLACK);
-            gc.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        } else if(winner) {
-            gc.setFill(Color.GREEN);
-            gc.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        } else {
-            gc.setFill(BACKGROUND);
-            gc.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-            for(int i = 0; i < WIDTH; i++){
-                int y = i*TILE_SIZE + (i + 1)*PADDING;
-                for(int j = 0; j < HEIGHT; j++){
-                    int x = j*TILE_SIZE + (j + 1)*PADDING;
-                    setColor(i, j);
-                    gc.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    if(gameBoard[i][j] != 0){
-                        gc.setFill(Color.BLACK);
-                        gc.fillText("" + gameBoard[i][j], x + TILE_SIZE - TILE_SIZE/2, y + TILE_SIZE - TILE_SIZE/3);
-                    }
-                }
+    public int[][] getGameBoard() {
+        return gameBoard;
+    }
+    public boolean isGameOver(){
+        return gameOver;
+    }
+    public boolean isWinner(){
+        return winner;
+    }
+
+    public void updateBoard(Movement movement){
+        if(!gameOver || !winner){
+            switch (movement){
+                case UP:
+                    moveUp();
+                    break;
+                case DOWN:
+                    moveDown();
+                    break;
+                case RIGHT:
+                    moveRight();
+                    break;
+                case LEFT:
+                    moveLeft();
+                    break;
             }
         }
     }
 
-    public void moveUp(){
+    private void moveUp(){
         if(canMoveUp()){
-            for(int col = 0; col < 4; col++){
+            for(int col = 0; col < SIZE; col++){
                 moveColumnUp(col);
             }
             placePiece();
-            drawBoard();
         }
     }
-
-    public void moveDown(){
+    private void moveDown(){
         if(canMoveDown()){
-            for(int col = 0; col < 4; col++){
+            for(int col = 0; col < SIZE; col++){
                 moveColumnDown(col);
             }
             placePiece();
-            drawBoard();
         }
     }
-
-    public void moveRight(){
+    private void moveRight(){
         if(canMoveRight()){
-            for(int row = 0; row < 4; row++){
+            for(int row = 0; row < SIZE; row++){
                 moveRowRight(row);
             }
             placePiece();
-            drawBoard();
         }
     }
-
-    public void moveLeft(){
+    private void moveLeft(){
         if(canMoveLeft()){
-            for(int row = 0; row < 4; row++){
+            for(int row = 0; row < SIZE; row++){
                 moveRowLeft(row);
             }
             placePiece();
-            drawBoard();
         }
     }
 
@@ -120,7 +104,7 @@ public class GameHandler {
         slideUp_Or_Left(gameBoard[row]);
 
         // Merge if possible
-        for(int col = 1; col < 4; col++){
+        for(int col = 1; col < SIZE; col++){
             if(gameBoard[row][col] == gameBoard[row][col-1]) {
                 gameBoard[row][col-1] *= 2;
                 gameBoard[row][col] = 0;
@@ -131,7 +115,6 @@ public class GameHandler {
 
         // Slide row to left if possible
         slideUp_Or_Left(gameBoard[row]);
-
     }
 
     // Help function to slide each tile toward the left side
@@ -139,7 +122,7 @@ public class GameHandler {
         boolean change;
         do{
             change = false;
-            for(int col = 0; col < 3; col++){
+            for(int col = 0; col < SIZE-1; col++){
                 if(row[col] == 0 && row[col + 1] != 0){
                     row[col] = row[col + 1];
                     row[col + 1] = 0;
@@ -155,7 +138,7 @@ public class GameHandler {
         slideDown_Or_Right(gameBoard[row]);
 
         // Merge if possible
-        for(int col = 2; col >= 0; col--){
+        for(int col = SIZE-2; col >= 0; col--){
             if(gameBoard[row][col] == gameBoard[row][col+1]) {
                 gameBoard[row][col+1] *= 2;
                 gameBoard[row][col] = 0;
@@ -173,7 +156,7 @@ public class GameHandler {
         boolean change;
         do{
             change = false;
-            for(int col = 3; col > 0; col--){
+            for(int col = SIZE-1; col > 0; col--){
                 if(row[col] == 0 && row[col - 1] != 0){
                     row[col] = row[col - 1];
                     row[col - 1] = 0;
@@ -191,7 +174,7 @@ public class GameHandler {
         slideUp_Or_Left(tempCol);
 
         // Merge if possible
-        for(int row = 1; row < 4; row++){
+        for(int row = 1; row < SIZE; row++){
             if(tempCol[row] == tempCol[row-1]) {
                 tempCol[row-1] *= 2;
                 tempCol[row] = 0;
@@ -203,7 +186,7 @@ public class GameHandler {
         slideUp_Or_Left(tempCol);
 
         // Update the correct column in gameBoard
-        for(int i = 0; i < HEIGHT; i++) {
+        for(int i = 0; i < SIZE; i++) {
             gameBoard[i][col] = tempCol[i];
         }
     }
@@ -216,7 +199,7 @@ public class GameHandler {
         slideDown_Or_Right(tempCol);
 
         // Merge if possible
-        for(int row = 2; row >= 0; row--){
+        for(int row = SIZE-2; row >= 0; row--){
             if(tempCol[row] == tempCol[row+1]) {
                 tempCol[row+1] *= 2;
                 tempCol[row] = 0;
@@ -228,23 +211,23 @@ public class GameHandler {
         slideDown_Or_Right(tempCol);
 
         // Update the correct column in gameBoard
-        for(int i = 0; i < HEIGHT; i++) {
+        for(int i = 0; i < SIZE; i++) {
             gameBoard[i][col] = tempCol[i];
         }
     }
 
     // Function that return a column in GameBoard as a 1d array
     private int[] getCol(int col) {
-        int[] tempCol = new int[HEIGHT];
+        int[] tempCol = new int[SIZE];
         // Copy the column into a 1d array (to be able to reuse slide function)
-        for(int i = 0; i < HEIGHT; i++) {
+        for(int i = 0; i < SIZE; i++) {
             tempCol[i] = gameBoard[i][col];
         }
         return tempCol;
     }
 
     private boolean canMoveLeft(){
-        for(int i = 0; i < HEIGHT; i++) {
+        for(int i = 0; i < SIZE; i++) {
             if (canMoveRow_Up_Or_Left(gameBoard[i]))
                 return true;
         }
@@ -252,7 +235,7 @@ public class GameHandler {
     }
 
     private boolean canMoveUp(){
-        for(int i = 0; i < WIDTH; i++) {
+        for(int i = 0; i < SIZE; i++) {
             if(canMoveRow_Up_Or_Left(getCol(i)))
                 return true;
         }
@@ -260,7 +243,7 @@ public class GameHandler {
     }
 
     private boolean canMoveRight() {
-        for(int i = 0; i < HEIGHT; i++) {
+        for(int i = 0; i < SIZE; i++) {
             if(canMoveRow_Down_Or_Right(gameBoard[i]))
                 return true;
         }
@@ -268,7 +251,7 @@ public class GameHandler {
     }
 
     private boolean canMoveDown() {
-        for(int i = 0; i < WIDTH; i++) {
+        for(int i = 0; i < SIZE; i++) {
             if(canMoveRow_Down_Or_Right(getCol(i)))
                 return true;
         }
@@ -278,27 +261,27 @@ public class GameHandler {
 
     private boolean canMoveRow_Up_Or_Left(int[] row) {
         boolean empty = false;
-        for(int i = 0; i < WIDTH-1; i++) {
+        for(int i = 0; i < SIZE -1; i++) {
             if(row[i] == 0 && !empty){
                 // If empty square and empty is still false -> set empty to true
                 empty = true;
-            } else if((row[i] != 0 && empty) || row[i] == row[i+1]){
+            } else if((row[i] != 0 && empty) || (row[i] == row[i+1]) && row[i] != 0){
                 // If there has been an empty tile and current tile is not empty -> return true
                 // or if current tile and next tile has the same value -> return true
                 return true;
             }
         }
         // Check the last tile of row/column (reason for this is to avoid index out of bounds in for loop)
-        return row[WIDTH-1] != 0 && empty;
+        return row[SIZE -1] != 0 && empty;
     }
 
     private boolean canMoveRow_Down_Or_Right(int[] row) {
         boolean empty = false;
-        for(int i = WIDTH - 1; i > 0; i--) {
+        for(int i = SIZE - 1; i > 0; i--) {
             if(row[i] == 0 && !empty) {
                 // If empty tile and empty is still false -> set empty to true
                 empty = true;
-            } else if((row[i] != 0 && empty) || row[i] == row[i-1]) {
+            } else if((row[i] != 0 && empty) || (row[i] == row[i-1] && row[i] != 0)) {
                 // If there has been an empty tile and current tile is not empty -> return true
                 // or if current tile and next tile has the same value -> return true
                 return true;
@@ -311,8 +294,8 @@ public class GameHandler {
     // Place tile
     private void placePiece() {
         while(true){
-            int x = rnd.nextInt(4);
-            int y = rnd.nextInt(4);
+            int x = rnd.nextInt(SIZE);
+            int y = rnd.nextInt(SIZE);
             int value = rnd.nextInt(10);
             if(value > 1)
                 value = 2;
@@ -330,56 +313,14 @@ public class GameHandler {
     private void updateGameOver() {
         if(!canMoveDown() && !canMoveRight() && !canMoveLeft() && !canMoveUp()){
             gameOver = true;
-            drawBoard();
-        }
-    }
-
-    private void setColor(int x, int y) {
-        switch (gameBoard[x][y]){
-            case 0:
-                gc.setFill(EMPTY);
-                break;
-            case 2:
-                gc.setFill(TWO);
-                break;
-            case 4:
-                gc.setFill(FOUR);
-                break;
-            case 8:
-                gc.setFill(EIGHT);
-                break;
-            case 16:
-                gc.setFill(SIXTEEN);
-                break;
-            case 32:
-                gc.setFill(THIRTY);
-                break;
-            case 64:
-                gc.setFill(SIXTY);
-                break;
-            case 128:
-                gc.setFill(ONEHUNDRED);
-                break;
-            case 256:
-                gc.setFill(TWOHUNDRED);
-                break;
-            case 512:
-                gc.setFill(FIVEHUNDRED);
-                break;
-            case 1024:
-                gc.setFill(ONETHOUSAND);
-                break;
-            case 2048:
-                gc.setFill(TWOTHOUSAND);
-                break;
         }
     }
 
     // For debugging
     private void printBoard(){
         StringBuilder output = new StringBuilder("");
-        for(int i = 0; i < 4; i++) {
-            for(int j = 0; j < 4; j++){
+        for(int i = 0; i < SIZE; i++) {
+            for(int j = 0; j < SIZE; j++){
                 output.append(gameBoard[i][j] + "\t");
             }
             output.append("\n");

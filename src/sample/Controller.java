@@ -20,25 +20,26 @@ public class Controller implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gameWindow.setHeight(GameHandler.WINDOW_HEIGHT);
-        gameWindow.setWidth(GameHandler.WINDOW_WIDTH);
+        gameWindow.setHeight(Display.WINDOW_HEIGHT);
+        gameWindow.setWidth(Display.WINDOW_WIDTH);
 
         gc = gameWindow.getGraphicsContext2D();
         gameHandler = new GameHandler(gc);
 
-        gameHandler.drawBoard();
+        Display.drawBoard(gc, gameHandler);
     }
 
     @FXML
     public void update(KeyEvent e) {
         if(e.getCode() == KeyCode.UP){
-            gameHandler.moveUp();
+            gameHandler.updateBoard(GameHandler.Movement.UP);
         } else if(e.getCode() == KeyCode.DOWN){
-            gameHandler.moveDown();
+            gameHandler.updateBoard(GameHandler.Movement.DOWN);
         } else if(e.getCode() == KeyCode.LEFT){
-            gameHandler.moveLeft();
+            gameHandler.updateBoard(GameHandler.Movement.LEFT);
         } else if(e.getCode() == KeyCode.RIGHT){
-            gameHandler.moveRight();
+            gameHandler.updateBoard(GameHandler.Movement.RIGHT);
         }
+        Display.drawBoard(gc, gameHandler);
     }
 }
