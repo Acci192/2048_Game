@@ -17,6 +17,8 @@ public class GameHandler {
     private boolean gameOver;
     private boolean winner;
 
+    private int score;
+
     public enum Movement {
         UP,
         DOWN,
@@ -28,10 +30,11 @@ public class GameHandler {
         this.gc = gc;
         this.gc.setTextAlign(TextAlignment.CENTER);
         this.gc.setFont(Font.font("Arial", FontWeight.BOLD, 40));
-        rnd = new Random();
-        gameBoard = new int[SIZE][SIZE];
-        gameOver = false;
-        winner = false;
+        this.rnd = new Random();
+        this.gameBoard = new int[SIZE][SIZE];
+        this.gameOver = false;
+        this.winner = false;
+        this.score = 0;
         placePiece();
         placePiece();
     }
@@ -63,6 +66,10 @@ public class GameHandler {
                     break;
             }
         }
+    }
+
+    public int getScore(){
+        return score;
     }
 
     private void moveUp(){
@@ -107,6 +114,7 @@ public class GameHandler {
         for(int col = 1; col < SIZE; col++){
             if(gameBoard[row][col] == gameBoard[row][col-1]) {
                 gameBoard[row][col-1] *= 2;
+                score += gameBoard[row][col-1];
                 gameBoard[row][col] = 0;
                 if(gameBoard[row][col-1] == 2048)
                     winner = true;
@@ -141,6 +149,7 @@ public class GameHandler {
         for(int col = SIZE-2; col >= 0; col--){
             if(gameBoard[row][col] == gameBoard[row][col+1]) {
                 gameBoard[row][col+1] *= 2;
+                score += gameBoard[row][col + 1];
                 gameBoard[row][col] = 0;
                 if(gameBoard[row][col+1] == 2048)
                     winner = true;
@@ -177,6 +186,7 @@ public class GameHandler {
         for(int row = 1; row < SIZE; row++){
             if(tempCol[row] == tempCol[row-1]) {
                 tempCol[row-1] *= 2;
+                score += tempCol[row-1];
                 tempCol[row] = 0;
                 if(tempCol[row-1] == 2048)
                     winner = true;
@@ -202,6 +212,7 @@ public class GameHandler {
         for(int row = SIZE-2; row >= 0; row--){
             if(tempCol[row] == tempCol[row+1]) {
                 tempCol[row+1] *= 2;
+                score += tempCol[row+1];
                 tempCol[row] = 0;
                 if(tempCol[row+1] == 2048)
                     winner = true;

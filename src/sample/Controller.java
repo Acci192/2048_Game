@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -13,6 +14,8 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable{
     @FXML
     private Canvas gameWindow;
+    @FXML
+    private TextArea score;
 
     private GraphicsContext gc;
 
@@ -27,6 +30,7 @@ public class Controller implements Initializable{
         gameHandler = new GameHandler(gc);
 
         Display.drawBoard(gc, gameHandler);
+        updateScore();
     }
 
     @FXML
@@ -41,5 +45,17 @@ public class Controller implements Initializable{
             gameHandler.updateBoard(GameHandler.Movement.RIGHT);
         }
         Display.drawBoard(gc, gameHandler);
+        updateScore();
+    }
+
+    @FXML
+    public void newGame(){
+        gameHandler = new GameHandler(gc);
+        Display.drawBoard(gc, gameHandler);
+        updateScore();
+    }
+
+    private void updateScore() {
+        score.setText("Score\n" + gameHandler.getScore());
     }
 }

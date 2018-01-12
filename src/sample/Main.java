@@ -12,9 +12,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("2048");
-        primaryStage.setScene(new Scene(root, Display.WINDOW_WIDTH, Display.WINDOW_HEIGHT));
+        primaryStage.setScene(new Scene(root, Display.WINDOW_WIDTH, Display.WINDOW_HEIGHT + 100));
         primaryStage.show();
         root.requestFocus();
+
     }
 
 
